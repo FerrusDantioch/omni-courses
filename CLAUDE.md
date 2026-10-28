@@ -7,6 +7,10 @@ en français simple, sans jargon, et lui répondre en français.
 
 Écrans : Liste (carte du budget collée en haut), Favoris, Réglages (thème,
 budget, sauvegarde), À propos. Navigation en bas ; bouton « Ajouter » flottant.
+Fenêtre favori : « Enregistrer » ou « Enregistrer et ajouter à la liste »
+(v1.1.0, `placerDansLaListe` dans app.js, partagé avec le bouton +).
+Les tests lisent `CACHE` et `VERSION` dans les fichiers : rien à y changer
+quand on monte de version.
 
 ## ⚠️ Contraintes à préserver
 
@@ -60,7 +64,7 @@ fichiers : l'ajuster). Une nouvelle version attend « Mettre à jour » : pas de
 
 ## Tests
 
-`node tests/tester.js` (Playwright + Chromium) : 140 vérifications, dont
+`node tests/tester.js` (Playwright + Chromium) : 146 vérifications, dont
 contrastes WCAG dans les 3 thèmes × 3 états du budget, hors ligne, mise à jour
 simulée sans perte de données. `node tests/serveur.js` sert l'application à
 http://localhost:8000/omni-courses/ (même forme d'adresse que GitHub Pages).

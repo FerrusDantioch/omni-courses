@@ -23,6 +23,11 @@ const { demarrerServeur } = require('./serveur.js');
 const PORT = 8765;
 const ADRESSE = 'http://localhost:' + PORT + '/omni-courses/';
 const RACINE = path.resolve(__dirname, '..');
+// Numéros de version actuels, lus directement dans les fichiers
+const CACHE_ACTUEL = fs.readFileSync(path.join(RACINE, 'sw.js'), 'utf8').match(/const CACHE = '(omni-courses-v(\d+))'/);
+const VERSION_ACTUELLE = fs.readFileSync(path.join(RACINE, 'app.js'), 'utf8').match(/const VERSION = '([\d.]+)'/)[1];
+const CACHE_SUIVANT = 'omni-courses-v' + (Number(CACHE_ACTUEL[2]) + 1);
+const VERSION_SUIVANTE = VERSION_ACTUELLE.replace(/\d+$/, (n) => String(Number(n) + 1));
 const TELEPHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
 
 let reussis = 0;
@@ -356,6 +361,30 @@ const MESURER_CONTRASTES = () => {
     await p.click('#favori-supprimer');
     await p.click('#favori-supprimer');
     verifier(!(await p.$('.favori:has-text("Café")')), 'Favori supprimé (deux appuis)');
+
+    // « Enregistrer et ajouter à la liste » : un seul formulaire, rien à retaper
+    await p.click('[data-action="nouveau-favori"]');
+    await p.fill('#favori-nom', 'Beurre doux');
+    await p.fill('#favori-prix', '2,35');
+    await p.click('#favori-ajouter-liste');
+    verifier(await texte(p, '#message-bref') === 'Favori « Beurre doux » enregistré et ajouté à la liste', 'Nouveau favori : « Enregistrer et ajouter à la liste » (message)', await texte(p, '#message-bref'));
+    verifier((await texte(p, '.favori:has-text("Beurre doux") .favori-detail')) === '2,35 € · déjà dans la liste (× 1)', 'Le favori est créé ET mis dans la liste avec son prix');
+    await p.click('[data-aller="liste"]');
+    verifier(await texte(p, '.article:has-text("Beurre doux") .article-detail') === '2,35 €' &&
+      await p.$eval('.article:has-text("Beurre doux") [data-action="favori-article"]', (b) => b.getAttribute('aria-pressed')) === 'true',
+      'Dans la liste : l\'article a son prix et son étoile de favori');
+    await p.click('[data-aller="favoris"]');
+    await p.click('.favori:has-text("Beurre doux") [data-action="modifier-favori"]');
+    await p.click('#favori-ajouter-liste');
+    verifier((await texte(p, '.favori:has-text("Beurre doux") .favori-detail')).endsWith('(× 2)') &&
+      (await texte(p, '#message-bref')).includes('quantité augmentée dans la liste'),
+      'Déjà dans la liste : la quantité augmente au lieu de créer un doublon');
+    await p.click('.favori:has-text("Beurre doux") [data-action="modifier-favori"]');
+    await p.fill('#favori-prix', 'abc');
+    await p.click('#favori-ajouter-liste');
+    verifier(await p.$eval('#dialogue-favori', (d) => d.open) && await visible(p, '#favori-prix-erreur'), 'Prix invalide : refusé, rien n\'est ajouté');
+    await p.click('#dialogue-favori [data-action="fermer"]');
+    verifier((await texte(p, '.favori:has-text("Beurre doux") .favori-detail')).endsWith('(× 2)'), 'Après « Annuler » : liste inchangée');
     await ctx.close();
   });
 
@@ -567,7 +596,7 @@ const MESURER_CONTRASTES = () => {
     await p.evaluate(() => navigator.serviceWorker.ready);
     await p.reload();
     verifier(await p.evaluate(() => !!navigator.serviceWorker.controller), 'Service worker actif');
-    const fichiersEnCache = await p.evaluate(() => caches.open('omni-courses-v1').then((c) => c.keys()).then((k) => k.length));
+    const fichiersEnCache = await p.evaluate((nom) => caches.open(nom).then((c) => c.keys()).then((k) => k.length), CACHE_ACTUEL[1]);
     verifier(fichiersEnCache === 15, 'Les 15 fichiers de l\'application sont rangés dans le téléphone', fichiersEnCache);
     await poserDonnees(p, { version: 1, budgetCentimes: 2000, favoris: [], articles: [article('Lait', 1, 115)] }, { theme: 'omni' });
 
@@ -606,22 +635,22 @@ const MESURER_CONTRASTES = () => {
 
     // Nouvelle version publiée
     const sw = path.join(dossier, 'sw.js');
-    fs.writeFileSync(sw, fs.readFileSync(sw, 'utf8').replace("'omni-courses-v1'", "'omni-courses-v2'"));
+    fs.writeFileSync(sw, fs.readFileSync(sw, 'utf8').replace("'" + CACHE_ACTUEL[1] + "'", "'" + CACHE_SUIVANT + "'"));
     const app = path.join(dossier, 'app.js');
-    fs.writeFileSync(app, fs.readFileSync(app, 'utf8').replace("const VERSION = '1.0.0'", "const VERSION = '1.0.1'"));
+    fs.writeFileSync(app, fs.readFileSync(app, 'utf8').replace("const VERSION = '" + VERSION_ACTUELLE + "'", "const VERSION = '" + VERSION_SUIVANTE + "'"));
     await p.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
     await p.waitForSelector('#bandeau-mise-a-jour:not([hidden])', { timeout: 10000 });
     verifier(true, 'Nouvelle version détectée : le bandeau « Mettre à jour » s\'affiche (rien ne change par surprise)');
-    verifier((await texte(p, '#numero-version').catch(() => '')) === 'Version 1.0.0', 'Tant qu\'on n\'a pas appuyé, l\'ancienne version reste');
+    verifier((await texte(p, '#numero-version').catch(() => '')) === 'Version ' + VERSION_ACTUELLE, 'Tant qu\'on n\'a pas appuyé, l\'ancienne version reste');
     await Promise.all([p.waitForEvent('load'), p.click('[data-action="mettre-a-jour"]')]);
     await p.click('[data-aller="apropos"]');
-    verifier(await texte(p, '#numero-version') === 'Version 1.0.1', 'Après « Mettre à jour » : version 1.0.1');
+    verifier(await texte(p, '#numero-version') === 'Version ' + VERSION_SUIVANTE, 'Après « Mettre à jour » : version ' + VERSION_SUIVANTE);
     await p.click('[data-aller="liste"]');
     const c = await carte(p);
     verifier(c.total === '2,30 €' && c.budget === '30,00 €' && c.coche === '2,30 €' && await p.evaluate(() => document.documentElement.dataset.theme) === 'omni',
       'Liste, budget, cochés et thème conservés après la mise à jour', c);
     const caches = await p.evaluate(() => caches.keys());
-    verifier(caches.includes('omni-courses-v2') && !caches.includes('omni-courses-v1') && caches.includes('autre-application-v1'),
+    verifier(caches.includes(CACHE_SUIVANT) && !caches.includes(CACHE_ACTUEL[1]) && caches.includes('autre-application-v1'),
       'Ancien cache supprimé, celui des autres applications du site laissé intact', caches);
     await ctx.close();
     serveur2.close();

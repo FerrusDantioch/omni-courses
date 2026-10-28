@@ -13,7 +13,7 @@
 /* ⚠️ À augmenter d'un cran (v1 → v2…) à CHAQUE modification d'un fichier
    de la liste FICHIERS ci-dessous. Sinon, les téléphones qui ont déjà
    ouvert l'application gardent l'ancienne version. */
-const CACHE = 'omni-courses-v1';
+const CACHE = 'omni-courses-v2';
 
 /* Le début du nom de cache propre à Omni-Courses. Toutes les applications
    de ferrusdantioch.github.io partagent le même espace de caches : on ne

@@ -382,6 +382,11 @@
 
     <div class="commandes">
       <button type="submit" class="bouton bouton-principal large" value="valider" id="favori-valider">Enregistrer</button>
+      <!-- Enregistre le favori ET le met dans la liste : rien à retaper -->
+      <button type="submit" class="bouton large" value="ajouter-liste" id="favori-ajouter-liste">
+        <svg class="icone" aria-hidden="true"><use href="#i-panier"></use></svg>
+        Enregistrer et ajouter à la liste
+      </button>
       <button type="button" class="bouton large bouton-danger" data-action="supprimer-favori" id="favori-supprimer">Supprimer ce favori</button>
       <button type="button" class="bouton large" data-action="fermer">Annuler</button>
     </div>

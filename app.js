@@ -23,7 +23,7 @@
 
 /* ⚠️ Numéro affiché dans « À propos ». À augmenter avec la version du
    service worker (constante CACHE dans sw.js) à chaque modification. */
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 
 
 /* ---------- 1. État général et enregistrement ---------- */
@@ -519,22 +519,30 @@ function afficherFavoris() {
   $('#favoris-vide').hidden = donnees.favoris.length > 0;
 }
 
-/* Un favori rejoint la liste en un geste. S'il y est déjà (et pas
-   encore coché), sa quantité augmente de 1 au lieu de faire un doublon. */
-function ajouterFavoriALaListe(id) {
-  const favori = donnees.favoris.find((f) => f.id === id);
-  if (!favori) return;
+/* Met un favori dans la liste (sans enregistrer : c'est à l'appelant de
+   le faire). S'il y est déjà (et pas encore coché), sa quantité augmente
+   de 1 au lieu de faire un doublon.
+   Rend { ok, message } : ok vaut false si la liste est pleine. */
+function placerDansLaListe(favori) {
   const existant = articleDuFavori(favori);
   if (existant) {
     existant.quantite = Math.min(LIMITES.quantiteMax, Math.round((existant.quantite + 1) * 1000) / 1000);
-    messageBref('«\u00a0' + existant.nom + '\u00a0» : quantité passée à ' + Quantite.formater(existant.quantite));
-  } else if (donnees.articles.length >= LIMITES.articles) {
-    messageBref('Ta liste est pleine (' + LIMITES.articles + ' articles au maximum).');
-    return;
-  } else {
-    donnees.articles.push({ id: nouvelId(), nom: favori.nom, quantite: 1, prixCentimes: favori.prixCentimes, coche: false });
-    messageBref('«\u00a0' + favori.nom + '\u00a0» ajouté à la liste');
+    return { ok: true, message: '«\u00a0' + existant.nom + '\u00a0» : quantité passée à ' + Quantite.formater(existant.quantite) };
   }
+  if (donnees.articles.length >= LIMITES.articles) {
+    return { ok: false, message: 'Ta liste est pleine (' + LIMITES.articles + ' articles au maximum).' };
+  }
+  donnees.articles.push({ id: nouvelId(), nom: favori.nom, quantite: 1, prixCentimes: favori.prixCentimes, coche: false });
+  return { ok: true, message: '«\u00a0' + favori.nom + '\u00a0» ajouté à la liste' };
+}
+
+/* Le bouton + d'un favori : il rejoint la liste en un geste */
+function ajouterFavoriALaListe(id) {
+  const favori = donnees.favoris.find((f) => f.id === id);
+  if (!favori) return;
+  const resultat = placerDansLaListe(favori);
+  messageBref(resultat.message);
+  if (!resultat.ok) return;
   enregistrer();
   redonnerFocus('[data-action="ajouter-favori"][data-id="' + CSS.escape(id) + '"]');
 }
@@ -558,6 +566,8 @@ $('#favori-nom').addEventListener('keydown', (e) => {
 
 dlgFavori.addEventListener('submit', (e) => {
   e.preventDefault();
+  // « valider » (Enregistrer) ou « ajouter-liste » (Enregistrer et ajouter à la liste)
+  const action = e.submitter ? e.submitter.value : 'valider';
   const champNom = $('#favori-nom');
   const champPrix = $('#favori-prix');
   const nom = nettoyerNom(champNom.value);
@@ -569,19 +579,30 @@ dlgFavori.addEventListener('submit', (e) => {
   if (!nom || doublon) { champNom.focus(); return; }
   if (!prix.ok) { champPrix.focus(); return; }
 
-  if (favoriEnCours) {
-    const favori = donnees.favoris.find((f) => f.id === favoriEnCours);
-    if (favori) { favori.nom = nom; favori.prixCentimes = prix.valeur; }
+  let favori = favoriEnCours ? donnees.favoris.find((f) => f.id === favoriEnCours) : null;
+  if (favori) {
+    favori.nom = nom;
+    favori.prixCentimes = prix.valeur;
   } else {
     if (donnees.favoris.length >= LIMITES.favoris) {
       erreurChamp(champNom, 'Tu as déjà ' + LIMITES.favoris + ' favoris : retires-en un d\'abord.');
       return;
     }
-    donnees.favoris.push({ id: nouvelId(), nom, prixCentimes: prix.valeur });
+    favori = { id: nouvelId(), nom, prixCentimes: prix.valeur };
+    donnees.favoris.push(favori);
+  }
+
+  let message = 'Favori «\u00a0' + nom + '\u00a0» enregistré';
+  if (action === 'ajouter-liste') {
+    // Le favori part aussi dans la liste de courses : rien à retaper
+    const resultat = placerDansLaListe(favori);
+    message = resultat.ok
+      ? message + ' et ' + (resultat.message.includes('quantité') ? 'quantité augmentée dans la liste' : 'ajouté à la liste')
+      : message + '. ' + resultat.message;
   }
   enregistrer();
   dlgFavori.close();
-  messageBref('Favori «\u00a0' + nom + '\u00a0» enregistré');
+  messageBref(message);
 });
 
 function supprimerFavori(bouton) {

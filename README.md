@@ -50,7 +50,9 @@ Application de l'Omni-système, conçue par Ferrus Dantioch.
   garder les articles et tout décocher). Quand la liste repart de zéro et qu'un
   budget existe, l'application demande si vous gardez le même budget.
 - **Favoris** : des articles avec leur prix, ajoutés à la liste **en un seul
-  geste**. Touchez l'étoile ☆ à côté d'un article pour en faire un favori.
+  geste** (bouton +). Touchez l'étoile ☆ à côté d'un article pour en faire un
+  favori. En créant ou modifiant un favori, le bouton **« Enregistrer et ajouter
+  à la liste »** le met aussi directement dans la liste : rien à saisir deux fois.
 - **Sauvegarde** : export de toutes les données (liste, budget, favoris, thème)
   dans un fichier `omni-courses-sauvegarde-AAAA-MM-JJ.json`, et import avec
   vérification complète et confirmation avant de remplacer quoi que ce soit.
@@ -204,7 +206,7 @@ Tous les fichiers de l'application sont à la racine, sans sous-dossier.
 
 ## 9. Tests automatiques
 
-Le dossier `tests/` contient 140 vérifications qui pilotent un vrai navigateur
+Le dossier `tests/` contient 146 vérifications qui pilotent un vrai navigateur
 (liste, prix, budget dans tous ses états, favoris, export, import de fichiers
 valides et invalides, trois thèmes, contrastes, hors ligne, mise à jour sans
 perte de données). Ils nécessitent Node.js et Playwright :
