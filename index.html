@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<!--
+  Omni-Courses — © 2026 Ferrus Dantioch
+  Licence : Creative Commons BY-NC-ND 4.0 (texte complet dans le fichier LICENSE)
+  https://creativecommons.org/licenses/by-nc-nd/4.0/
+-->
+<html lang="fr" data-theme="omni">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<title>Omni-Courses</title>
+<meta name="description" content="Omni-Courses — ta liste de courses avec prix, budget et favoris. Fonctionne hors ligne, sans compte : tout reste sur ton téléphone.">
+<meta name="author" content="Ferrus Dantioch">
+<meta name="theme-color" content="#14111d">
+<meta name="mobile-web-app-capable" content="yes">
+<!-- Règles de sécurité : la page n'a le droit de charger QUE ses propres
+     fichiers, et ne peut rien envoyer sur internet (connect-src 'self').
+     C'est une garantie supplémentaire que tes données restent chez toi. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<!-- Pose le thème choisi AVANT le premier affichage (sinon l'écran
+     s'allumerait une fraction de seconde avec d'autres couleurs). -->
+<script src="./theme-initial.js"></script>
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<!-- ====== Petites icônes dessinées, réutilisées partout ======
+     Chaque <symbol> est une icône ; on l'affiche avec <use href="#i-…">.
+     Elles prennent la couleur du texte autour (currentColor). -->
+<svg class="sprites" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-moins" viewBox="0 0 24 24"><path d="M5 12h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-etoile" viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-etoile-pleine" viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-crayon" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+  <symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7.5 12.3l3 3 6-6.3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-attention" viewBox="0 0 24 24"><path d="M12 3.5L2.8 19.5h18.4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9.5v4.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="16.9" r="1.4" fill="currentColor"/></symbol>
+  <symbol id="i-depasse" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-liste" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M3.5 6l1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-reglages" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.8v2.6M12 18.6v2.6M2.8 12h2.6M18.6 12h2.6M5.5 5.5l1.9 1.9M16.6 16.6l1.9 1.9M5.5 18.5l1.9-1.9M16.6 7.4l1.9-1.9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.4" fill="currentColor"/></symbol>
+  <symbol id="i-panier" viewBox="0 0 24 24"><path d="M7 10c.5-5 9.5-5 10 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3.5 10h17M5 10l1.6 8.4c.2 1 .9 1.6 1.9 1.6h7c1 0 1.7-.6 1.9-1.6L19 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+  <symbol id="i-exporter" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-importer" viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<!-- Messages lus à voix haute par les lecteurs d'écran (invisibles à l'œil) -->
+<p id="annonce" class="annonce" aria-live="polite"></p>
+
+<main>
+
+<!-- =============================================================
+     ÉCRAN 1 : LA LISTE DE COURSES
+     ============================================================= -->
+<section class="vue" data-vue="liste" aria-labelledby="titre-liste">
+
+  <header class="entete">
+    <img class="logo" src="./icon-192.png" alt="" width="44" height="44">
+    <h1 id="titre-liste" tabindex="-1" class="marque">Omni<span>-Courses</span></h1>
+  </header>
+
+  <!-- Nouvelle version prête : rien ne change tant qu'on n'a pas appuyé -->
+  <div id="bandeau-mise-a-jour" class="bandeau" hidden>
+    <p>
+      <strong>Une nouvelle version d'Omni-Courses est prête</strong><br>
+      Tu choisis le moment. Ta liste, ton budget et tes favoris restent tels quels.<br>
+      <small>Si tu fermes complètement l'application, la nouvelle version sera là à la prochaine ouverture.</small>
+    </p>
+    <div class="rangee-2">
+      <button type="button" class="bouton bouton-principal" data-action="mettre-a-jour">Mettre à jour</button>
+      <button type="button" class="bouton" data-action="plus-tard">Plus tard</button>
+    </div>
+  </div>
+
+  <!-- Le stockage du téléphone a refusé d'enregistrer -->
+  <p id="alerte-stockage" class="erreur" role="alert" hidden>
+    Attention : tes dernières modifications n'ont pas pu être enregistrées sur ce
+    téléphone (mémoire pleine ou navigation privée). Exporte tes données dans
+    Réglages pour ne rien perdre.
+  </p>
+
+  <!-- ====== Carte du budget : toujours visible en haut de la liste ======
+       Elle reste collée en haut de l'écran quand on fait défiler.
+       Son contenu est rempli par app.js (fonction afficherCarteBudget). -->
+  <section id="carte-budget" class="carte-budget" aria-labelledby="titre-budget" data-etat="aucun">
+    <h2 id="titre-budget" class="annonce">Total et budget</h2>
+
+    <div class="cb-ligne-haut">
+      <p class="cb-total">
+        <span class="cb-libelle">Total de la liste</span>
+        <span id="cb-total" class="cb-montant mono">0,00 €</span>
+      </p>
+      <!-- Le budget est aussi le bouton pour le définir ou le modifier -->
+      <button type="button" class="cb-budget" data-action="budget" id="bouton-budget">
+        <span class="cb-libelle">Budget <svg class="icone petite" aria-hidden="true"><use href="#i-crayon"></use></svg></span>
+        <span id="cb-budget" class="mono">Définir</span>
+      </button>
+    </div>
+
+    <!-- État du budget : une icône ET un texte, jamais la couleur seule -->
+    <p id="cb-etat" class="cb-etat" hidden>
+      <svg class="icone" aria-hidden="true"><use id="cb-etat-icone" href="#i-ok"></use></svg>
+      <span id="cb-etat-texte"></span>
+    </p>
+
+    <!-- Barre de progression : partie pleine = articles cochés (déjà dans le
+         panier), partie hachurée = reste à acheter. Si le budget est dépassé,
+         un trait vertical montre où il s'arrête. -->
+    <div id="cb-barre" class="cb-barre" role="meter" aria-valuemin="0" hidden>
+      <span id="cb-barre-coche" class="cb-barre-coche"></span>
+      <span id="cb-barre-reste" class="cb-barre-reste"></span>
+      <span class="cb-repere" aria-hidden="true"></span>
+    </div>
+
+    <dl class="cb-details">
+      <div>
+        <dt>Dans le panier <small>(cochés)</small></dt>
+        <dd id="cb-coche" class="mono">0,00 €</dd>
+      </div>
+      <div>
+        <dt>Reste à acheter</dt>
+        <dd id="cb-reste" class="mono">0,00 €</dd>
+      </div>
+    </dl>
+    <p id="cb-sans-prix" class="cb-sans-prix" hidden></p>
+  </section>
+
+  <!-- ====== Les articles ====== -->
+  <h2 id="titre-a-acheter" class="titre-section">À acheter</h2>
+  <ul id="liste-a-acheter" class="liste-articles" aria-labelledby="titre-a-acheter"></ul>
+  <p id="liste-vide" class="vide" hidden>
+    Ta liste est vide. Touche «&nbsp;Ajouter&nbsp;» en bas de l'écran,
+    ou ajoute un article depuis tes favoris.
+  </p>
+
+  <h2 id="titre-panier" class="titre-section" hidden>Dans le panier</h2>
+  <ul id="liste-panier" class="liste-articles" aria-labelledby="titre-panier" hidden></ul>
+
+  <div class="commandes-liste">
+    <button type="button" class="bouton" data-action="retirer-coches" id="bouton-retirer-coches">Retirer les articles cochés</button>
+    <button type="button" class="bouton" data-action="recommencer" id="bouton-recommencer">Recommencer la liste</button>
+  </div>
+
+  <!-- Bouton d'ajout : en bas à droite, facile à atteindre avec le pouce -->
+  <button type="button" class="bouton bouton-principal bouton-flottant" data-action="ajouter-article">
+    <svg class="icone" aria-hidden="true"><use href="#i-plus"></use></svg>
+    Ajouter
+  </button>
+</section>
+
+
+<!-- =============================================================
+     ÉCRAN 2 : LES FAVORIS
+     ============================================================= -->
+<section class="vue" data-vue="favoris" aria-labelledby="titre-favoris" hidden>
+  <header class="entete-ecran">
+    <h1 id="titre-favoris" tabindex="-1">Favoris</h1>
+    <p class="aide">Touche «&nbsp;Ajouter&nbsp;» à côté d'un favori : il rejoint ta liste en un geste, avec son prix.</p>
+  </header>
+
+  <ul id="liste-favoris" class="liste-favoris"></ul>
+  <p id="favoris-vide" class="vide" hidden>
+    Tu n'as pas encore de favori. Crée-en un ci-dessous, ou touche l'étoile
+    à côté d'un article de ta liste.
+  </p>
+
+  <button type="button" class="bouton large" data-action="nouveau-favori">
+    <svg class="icone" aria-hidden="true"><use href="#i-plus"></use></svg>
+    Nouveau favori
+  </button>
+</section>
+
+
+<!-- =============================================================
+     ÉCRAN 3 : LES RÉGLAGES (thème, budget, sauvegarde)
+     ============================================================= -->
+<section class="vue" data-vue="reglages" aria-labelledby="titre-reglages" hidden>
+  <header class="entete-ecran">
+    <h1 id="titre-reglages" tabindex="-1">Réglages</h1>
+  </header>
+
+  <div class="pile">
+    <fieldset class="bloc">
+      <legend class="etiquette">Thème</legend>
+      <div class="choix">
+        <label class="option"><input type="radio" name="theme" value="auto">
+          <span>Automatique <small>(suit le réglage clair ou sombre du téléphone)</small></span></label>
+        <label class="option"><input type="radio" name="theme" value="clair"><span>Clair</span></label>
+        <label class="option"><input type="radio" name="theme" value="sombre"><span>Sombre</span></label>
+        <label class="option"><input type="radio" name="theme" value="omni"><span>Omni-système <small>(sombre aux reflets violets)</small></span></label>
+      </div>
+    </fieldset>
+
+    <div class="bloc">
+      <p class="etiquette">Budget de la liste</p>
+      <p id="reglages-budget">Aucun budget défini.</p>
+      <button type="button" class="bouton large" data-action="budget">Modifier le budget</button>
+    </div>
+
+    <div class="bloc">
+      <p class="etiquette">Sauvegarde</p>
+      <p>Tes données restent uniquement sur ce téléphone. Pour les garder en lieu sûr
+         (ou les passer sur un autre téléphone), exporte-les dans un fichier.
+         Le fichier contient ta liste, ton budget, tes favoris et ton thème.</p>
+      <div class="commandes">
+        <button type="button" class="bouton large" data-action="exporter">
+          <svg class="icone" aria-hidden="true"><use href="#i-exporter"></use></svg>
+          Exporter mes données
+        </button>
+        <button type="button" class="bouton large" data-action="importer">
+          <svg class="icone" aria-hidden="true"><use href="#i-importer"></use></svg>
+          Importer une sauvegarde
+        </button>
+      </div>
+      <!-- Le vrai sélecteur de fichier est caché : le bouton ci-dessus l'ouvre -->
+      <input type="file" id="fichier-import" class="annonce" tabindex="-1" aria-hidden="true">
+      <p id="message-sauvegarde" class="message" role="status" hidden></p>
+      <p id="erreur-sauvegarde" class="erreur" role="alert" hidden></p>
+    </div>
+  </div>
+</section>
+
+
+<!-- =============================================================
+     ÉCRAN 4 : À PROPOS
+     ============================================================= -->
+<section class="vue" data-vue="apropos" aria-labelledby="titre-apropos" hidden>
+  <header class="entete-ecran">
+    <h1 id="titre-apropos" tabindex="-1">À propos</h1>
+  </header>
+
+  <div class="pile">
+    <div class="bloc">
+      <div class="apropos-entete">
+        <img src="./icon-192.png" alt="" width="72" height="72">
+        <div>
+          <p class="marque marque-petite">Omni<span>-Courses</span></p>
+          <p class="mono" id="numero-version">Version</p>
+        </div>
+      </div>
+      <p>Ta liste de courses, avec les prix, un budget à ne pas dépasser et tes articles
+         favoris. Omni-Courses fonctionne sans connexion et sans compte. Tout reste
+         sur ce téléphone : rien n'est envoyé sur internet.</p>
+    </div>
+
+    <!-- Mention de l'auteur : uniquement le pseudonyme, jamais le vrai nom.
+         Claude a aidé à écrire le code : l'application elle-même n'utilise
+         aucune intelligence artificielle et n'envoie rien. -->
+    <div class="bloc">
+      <p class="etiquette">Conception</p>
+      <p>Application développée par <strong>Ferrus Dantioch</strong>, avec l'aide de
+         <strong>Claude</strong>, une intelligence artificielle développée par Anthropic.</p>
+      <p>Ferrus Dantioch, créateur de l'Omni-système, en a eu l'idée, a choisi ses
+         fonctions et son apparence, puis l'a testée. Claude a écrit le code en suivant
+         ses consignes.</p>
+      <p>L'application elle-même n'utilise aucune intelligence artificielle.</p>
+      <!-- Le portfolio s'ouvre à part : Omni-Courses reste ouvert -->
+      <p><a href="https://ferrusdantioch.github.io/omni-systeme/" target="_blank" rel="noopener noreferrer">Découvrir l'Omni-système : le portfolio ↗</a></p>
+    </div>
+
+    <!-- Retours : le lien ouvre seulement l'application de messagerie du
+         téléphone, adresse et sujet déjà remplis. Rien ne part tout seul. -->
+    <div class="bloc">
+      <p class="etiquette">Retours</p>
+      <p>Une idée, une gêne, quelque chose qui manque ? Tes retours sont les bienvenus,
+         même en quelques mots. Écris à :
+         <span class="adresse-mail">omni-systeme.choking513@passmail.net</span></p>
+      <a class="bouton large" href="mailto:omni-systeme.choking513@passmail.net?subject=Retour%20sur%20Omni-Courses">Envoyer un retour par e-mail</a>
+    </div>
+
+    <div class="bloc">
+      <p class="etiquette">Licence</p>
+      <p>Code : © 2026 Ferrus Dantioch — <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.fr" target="_blank" rel="noopener noreferrer">Creative Commons BY-NC-ND 4.0</a>.
+         Le partage est autorisé, à l'identique et en citant l'auteur ; l'usage
+         commercial est interdit ; la modification est interdite. L'application est
+         fournie «&nbsp;en l'état&nbsp;», sans garantie. Texte complet dans le fichier LICENSE
+         du dépôt.</p>
+      <p><small>Polices Oxanium, Literata et JetBrains Mono : licence SIL Open Font
+         License 1.1 (fichier POLICES-OFL.txt).</small></p>
+    </div>
+
+    <div class="bloc">
+      <p class="etiquette">Installation sur Android</p>
+      <p>Dans Chrome, ouvre le menu ⋮ puis «&nbsp;Ajouter à l'écran d'accueil&nbsp;» ou
+         «&nbsp;Installer l'application&nbsp;».</p>
+      <p><small>Si Chrome indique «&nbsp;Cette appli est déjà installée&nbsp;» alors qu'elle ne
+         l'est pas, c'est une limite de Chrome quand une autre application de ce site
+         est déjà installée. Utilise un autre navigateur (Brave, par exemple), ou
+         choisis «&nbsp;Créer un raccourci&nbsp;».</small></p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- Petit message temporaire en bas de l'écran («&nbsp;Lait ajouté à la liste&nbsp;») -->
+<div id="message-bref" class="message-bref" role="status" aria-live="polite" hidden></div>
+
+<!-- ====== Barre de navigation, en bas : facile à atteindre d'une main ====== -->
+<nav class="navigation" aria-label="Écrans de l'application">
+  <a href="#" data-aller="liste" aria-current="page">
+    <svg class="icone" aria-hidden="true"><use href="#i-liste"></use></svg><span>Liste</span></a>
+  <a href="#favoris" data-aller="favoris">
+    <svg class="icone" aria-hidden="true"><use href="#i-etoile"></use></svg><span>Favoris</span></a>
+  <a href="#reglages" data-aller="reglages">
+    <svg class="icone" aria-hidden="true"><use href="#i-reglages"></use></svg><span>Réglages</span></a>
+  <a href="#apropos" data-aller="apropos">
+    <svg class="icone" aria-hidden="true"><use href="#i-info"></use></svg><span>À propos</span></a>
+</nav>
+
+
+<!-- =============================================================
+     FENÊTRES (boîtes de dialogue)
+     Elles s'ouvrent par-dessus l'écran. Le bouton «&nbsp;retour&nbsp;» du
+     téléphone ou «&nbsp;Annuler&nbsp;» les ferment sans rien changer.
+     ============================================================= -->
+
+<!-- Ajouter ou modifier un article -->
+<dialog id="dialogue-article" aria-labelledby="titre-dialogue-article">
+  <form method="dialog" class="formulaire" novalidate>
+    <h2 id="titre-dialogue-article">Ajouter un article</h2>
+
+    <div class="champ">
+      <label for="article-nom">Nom de l'article</label>
+      <input type="text" id="article-nom" maxlength="80" autocomplete="off" autocapitalize="sentences" enterkeyhint="next" aria-describedby="article-nom-erreur">
+      <p class="erreur-champ" id="article-nom-erreur" hidden></p>
+    </div>
+
+    <div class="rangee-2 champs-chiffres">
+      <div class="champ">
+        <label for="article-quantite">Quantité</label>
+        <div class="compteur">
+          <button type="button" class="bouton bouton-icone" data-action="quantite-moins" aria-label="Diminuer la quantité">
+            <svg class="icone" aria-hidden="true"><use href="#i-moins"></use></svg></button>
+          <input type="text" id="article-quantite" inputmode="decimal" autocomplete="off" enterkeyhint="next" aria-describedby="article-quantite-erreur">
+          <button type="button" class="bouton bouton-icone" data-action="quantite-plus" aria-label="Augmenter la quantité">
+            <svg class="icone" aria-hidden="true"><use href="#i-plus"></use></svg></button>
+        </div>
+        <p class="erreur-champ" id="article-quantite-erreur" hidden></p>
+      </div>
+      <div class="champ">
+        <label for="article-prix">Prix unitaire (€)</label>
+        <input type="text" id="article-prix" inputmode="decimal" autocomplete="off" enterkeyhint="done" placeholder="ex. 2,49" aria-describedby="article-prix-aide article-prix-erreur">
+        <p class="aide" id="article-prix-aide">Facultatif</p>
+        <p class="erreur-champ" id="article-prix-erreur" hidden></p>
+      </div>
+    </div>
+
+    <label class="option">
+      <input type="checkbox" id="article-favori">
+      <span>Dans mes favoris <small>(avec ce nom et ce prix)</small></span>
+    </label>
+
+    <div class="commandes">
+      <button type="submit" class="bouton bouton-principal large" value="valider" id="article-valider">Ajouter</button>
+      <button type="submit" class="bouton large" value="continuer" id="article-continuer">Ajouter et en saisir un autre</button>
+      <button type="button" class="bouton large bouton-danger" data-action="supprimer-article" id="article-supprimer">Supprimer cet article</button>
+      <button type="button" class="bouton large" data-action="fermer">Annuler</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Ajouter ou modifier un favori -->
+<dialog id="dialogue-favori" aria-labelledby="titre-dialogue-favori">
+  <form method="dialog" class="formulaire" novalidate>
+    <h2 id="titre-dialogue-favori">Nouveau favori</h2>
+
+    <div class="champ">
+      <label for="favori-nom">Nom</label>
+      <input type="text" id="favori-nom" maxlength="80" autocomplete="off" autocapitalize="sentences" enterkeyhint="next" aria-describedby="favori-nom-erreur">
+      <p class="erreur-champ" id="favori-nom-erreur" hidden></p>
+    </div>
+    <div class="champ">
+      <label for="favori-prix">Prix unitaire (€)</label>
+      <input type="text" id="favori-prix" inputmode="decimal" autocomplete="off" enterkeyhint="done" placeholder="ex. 1,15" aria-describedby="favori-prix-aide favori-prix-erreur">
+      <p class="aide" id="favori-prix-aide">Facultatif</p>
+      <p class="erreur-champ" id="favori-prix-erreur" hidden></p>
+    </div>
+
+    <div class="commandes">
+      <button type="submit" class="bouton bouton-principal large" value="valider" id="favori-valider">Enregistrer</button>
+      <button type="button" class="bouton large bouton-danger" data-action="supprimer-favori" id="favori-supprimer">Supprimer ce favori</button>
+      <button type="button" class="bouton large" data-action="fermer">Annuler</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Définir, modifier ou retirer le budget -->
+<dialog id="dialogue-budget" aria-labelledby="titre-dialogue-budget">
+  <form method="dialog" class="formulaire" novalidate>
+    <h2 id="titre-dialogue-budget">Budget de la liste</h2>
+    <p>Le montant total à ne pas dépasser pour cette liste. Si tu le dépasses,
+       Omni-Courses te prévient simplement : tu peux toujours ajouter des articles.</p>
+    <div class="champ">
+      <label for="budget-montant">Budget maximum (€)</label>
+      <input type="text" id="budget-montant" inputmode="decimal" autocomplete="off" enterkeyhint="done" placeholder="ex. 80" aria-describedby="budget-aide budget-montant-erreur">
+      <p class="aide" id="budget-aide">Laisse vide pour ne pas avoir de budget.</p>
+      <p class="erreur-champ" id="budget-montant-erreur" hidden></p>
+    </div>
+    <div class="commandes">
+      <button type="submit" class="bouton bouton-principal large" value="valider">Enregistrer</button>
+      <button type="button" class="bouton large" data-action="retirer-budget" id="budget-retirer">Retirer le budget</button>
+      <button type="button" class="bouton large" data-action="fermer">Annuler</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Vider ou recommencer la liste (avec la question du budget) -->
+<dialog id="dialogue-vider" aria-labelledby="titre-dialogue-vider" aria-describedby="texte-dialogue-vider">
+  <form method="dialog" class="formulaire" novalidate>
+    <h2 id="titre-dialogue-vider">Recommencer la liste</h2>
+    <p id="texte-dialogue-vider"></p>
+
+    <fieldset class="choix" id="vider-choix-articles">
+      <legend>Que faire des articles ?</legend>
+      <label class="option"><input type="radio" name="vider-articles" value="effacer" checked>
+        <span>Tout effacer <small>(la liste repart de zéro)</small></span></label>
+      <label class="option"><input type="radio" name="vider-articles" value="decocher">
+        <span>Garder les articles et tout décocher <small>(pour refaire les mêmes courses)</small></span></label>
+    </fieldset>
+
+    <fieldset class="choix" id="vider-choix-budget">
+      <legend>Garder le même budget ?</legend>
+      <label class="option"><input type="radio" name="vider-budget" value="garder" checked>
+        <span id="vider-garder-texte">Oui, garder le budget</span></label>
+      <label class="option"><input type="radio" name="vider-budget" value="retirer">
+        <span>Non, retirer le budget</span></label>
+    </fieldset>
+
+    <div class="commandes">
+      <button type="submit" class="bouton bouton-principal large" value="valider" id="vider-valider">Recommencer</button>
+      <button type="button" class="bouton large" data-action="fermer">Annuler</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Confirmer l'import d'une sauvegarde -->
+<dialog id="dialogue-import" aria-labelledby="titre-dialogue-import">
+  <form method="dialog" class="formulaire" novalidate>
+    <h2 id="titre-dialogue-import">Remplacer tes données ?</h2>
+    <p>Cette sauvegarde contient :</p>
+    <ul id="import-resume" class="resume"></ul>
+    <p class="avertissement">
+      <svg class="icone" aria-hidden="true"><use href="#i-attention"></use></svg>
+      <span>Ta liste, ton budget, tes favoris et ton thème actuels seront
+      <strong>remplacés</strong>. Si tu veux les garder, annule et exporte-les d'abord.</span>
+    </p>
+    <div class="commandes">
+      <button type="submit" class="bouton bouton-principal large" value="valider">Remplacer mes données</button>
+      <button type="button" class="bouton large" data-action="fermer">Annuler</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="./outils.js"></script>
+<script src="./stockage.js"></script>
+<script src="./sauvegarde.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

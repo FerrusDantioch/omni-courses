@@ -1,0 +1,825 @@
+/* Omni-Courses — © 2026 Ferrus Dantioch
+   Licence : Creative Commons BY-NC-ND 4.0 (texte complet dans le fichier LICENSE)
+   https://creativecommons.org/licenses/by-nc-nd/4.0/ */
+
+/* ============================================================
+   OMNI-COURSES — feuille de style
+   Principes appliqués :
+   - pensé d'abord pour le téléphone, utilisable d'une main
+   - grandes zones à toucher (au moins 48 px, 56 px pour les boutons)
+   - contrastes élevés (au moins 4,5 pour 1 pour tout le texte)
+   - aucune animation agressive, aucun clignotement, aucun blanc pur
+   - le réglage « réduire les animations » du téléphone est respecté
+   Les couleurs de chaque thème sont regroupées tout en haut (partie 2).
+   ============================================================ */
+
+
+/* ---------- 1. Polices ----------
+   Les trois polices du thème Omni-système, rangées DANS l'application
+   (fichiers .woff2 à côté de celui-ci) : elles marchent donc hors ligne,
+   sans rien demander à Google. Ce sont les mêmes fichiers qu'Omni-Time.
+   Licence : SIL Open Font License 1.1 (fichier POLICES-OFL.txt). */
+
+@font-face {
+  font-family: "Oxanium";               /* titres et boutons */
+  src: url("./oxanium.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;                   /* le texte s'affiche tout de suite */
+}
+@font-face {
+  font-family: "Literata";              /* texte courant */
+  src: url("./literata.woff2") format("woff2");
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";        /* montants en euros */
+  src: url("./jetbrains-mono.woff2") format("woff2");
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+/* ---------- 2. Thèmes ----------
+   Le thème est posé sur <html> par l'attribut data-theme (« omni »,
+   « sombre » ou « clair »). Le choix « Automatique » des réglages pose
+   « sombre » ou « clair » selon le téléphone.
+   Chaque thème définit les mêmes noms de couleurs :
+   --ok, --attention, --depasse sont les trois états du budget. */
+
+/* Omni-système : valeurs reprises À L'IDENTIQUE du portfolio de
+   l'Omni-système et d'Omni-Time. Ne pas « améliorer » ces couleurs.
+   États du budget : le bleu « Space opéra » (dans le budget), l'or
+   « Fantasy » (attention) et le rose doux d'Omni-Calculateur (dépassé). */
+:root,
+html[data-theme="omni"] {
+  --fond:        #14111d;   /* « nuit » : encre violette très sombre */
+  --surface:     #1d1929;   /* « table » : cartes, panneaux */
+  --surface-2:   #251f35;   /* boutons et champs, un cran plus clair */
+  --trait:       #332c47;   /* filets et bordures */
+  --texte:       #e9e4f2;   /* texte principal, jamais blanc pur */
+  --discret:     #a59cbb;   /* texte secondaire */
+  --accent:      #a777ff;   /* violet du logo */
+  --accent-texte:#140d24;   /* texte posé sur un bouton violet */
+  --halo:        #d6c2ff;   /* lueur de l'anneau (focus, liens) */
+  --lien:        #d6c2ff;
+  --ok:          #5fb4ff;   /* bleu « Space opéra » */
+  --attention:   #c9a24a;   /* or « Fantasy » */
+  --depasse:     #ff8fa3;   /* rose doux */
+
+  --f-titre:     "Oxanium", "Trebuchet MS", system-ui, sans-serif;
+  --f-texte:     "Literata", Georgia, "Times New Roman", serif;
+  --f-chiffres:  "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+
+  /* Cartes à la manière du portfolio : liseré violet en haut */
+  --carte-bord:   1px solid #332c47;
+  --carte-lisere: 4px solid #a777ff;
+  --rayon-carte:  6px 6px 14px 14px;
+  --rayon-bouton: 10px;
+  --ombre:        0 8px 28px rgb(0 0 0 / 45%);
+  color-scheme: dark;
+}
+
+/* Sombre : la gamme « Bleu-gris » de Cap, Refuge et Omni-Time, version
+   sombre. États du budget : sauge, sable et terracotta adoucis.
+   Polices du téléphone. */
+html[data-theme="sombre"] {
+  --fond:        #161b21;
+  --surface:     #1d242d;
+  --surface-2:   #252e39;
+  --trait:       #344050;
+  --texte:       #d4dae0;
+  --discret:     #97a2ae;
+  --accent:      #9dbcd0;
+  --accent-texte:#161b21;
+  --halo:        #9dbcd0;
+  --lien:        #9dbcd0;
+  --ok:          #a5ccb4;   /* sauge */
+  --attention:   #d9bc8f;   /* sable */
+  --depasse:     #eba592;   /* terracotta clair */
+
+  --f-titre:     system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-texte:     system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-chiffres:  system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --carte-bord:   1px solid #344050;
+  --carte-lisere: 1px solid #344050;
+  --rayon-carte:  16px;
+  --rayon-bouton: 14px;
+  --ombre:        0 8px 28px rgb(0 0 0 / 40%);
+  color-scheme: dark;
+}
+
+/* Clair : même gamme « Bleu-gris », version claire (fond gris très
+   clair, jamais blanc pur). Les couleurs des états sont foncées pour
+   dépasser 5:1 de contraste. */
+html[data-theme="clair"] {
+  --fond:        #eef0f2;
+  --surface:     #f7f8f9;
+  --surface-2:   #e9ebee;
+  --trait:       #d7dbe0;
+  --texte:       #3b4046;
+  --discret:     #5c626a;
+  --accent:      #4f7086;
+  --accent-texte:#f7f8f9;
+  --halo:        #4f7086;
+  --lien:        #3f5c6f;
+  --ok:          #3d5e53;   /* sauge foncée */
+  --attention:   #6e5232;   /* sable foncé */
+  --depasse:     #9b4430;   /* terracotta foncée */
+
+  --f-titre:     system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-texte:     system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-chiffres:  system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --carte-bord:   1px solid #d7dbe0;
+  --carte-lisere: 1px solid #d7dbe0;
+  --rayon-carte:  16px;
+  --rayon-bouton: 14px;
+  --ombre:        0 8px 24px rgb(40 50 60 / 16%);
+  color-scheme: light;
+}
+
+/* Valeurs communes à tous les thèmes */
+:root {
+  /* Bord des boutons : entre le texte secondaire et le fond, pour bien
+     voir où appuyer, sans trait éblouissant. */
+  --bord-bouton: color-mix(in srgb, var(--discret) 45%, var(--fond));
+  --duree: 300ms;           /* transitions douces, jamais brusques */
+  --hauteur-nav: 64px;      /* barre de navigation du bas */
+}
+
+
+/* ---------- 3. Base ---------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Un élément marqué « hidden » est toujours caché, quoi qu'il arrive */
+[hidden] { display: none !important; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background: var(--fond);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--fond);
+  color: var(--texte);
+  font-family: var(--f-texte);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;       /* jamais de défilement horizontal */
+  overflow-wrap: anywhere;  /* un mot très long passe à la ligne */
+}
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  /* En bas : la place de la barre de navigation et du bouton « Ajouter » */
+  padding: max(10px, env(safe-area-inset-top)) 16px
+           calc(var(--hauteur-nav) + 104px + env(safe-area-inset-bottom));
+}
+
+h1, h2, h3 { font-family: var(--f-titre); line-height: 1.2; margin: 0; }
+h1 { font-size: 1.5rem; font-weight: 700; }
+h2 { font-size: 1.2rem; font-weight: 700; }
+h1:focus, h2:focus { outline: none; }   /* le titre reçoit le focus en changeant d'écran */
+p { margin: 0; }
+
+a { color: var(--lien); text-underline-offset: 3px; }
+
+:focus-visible {
+  outline: 3px solid var(--halo);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+small, .aide { color: var(--discret); font-size: 0.9rem; }
+
+.etiquette {
+  font-family: var(--f-titre);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--discret);
+  margin-bottom: 6px;
+}
+
+.mono { font-family: var(--f-chiffres); font-variant-numeric: tabular-nums; }
+
+/* Texte réservé aux lecteurs d'écran : invisible, mais lu à voix haute */
+.annonce {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Le réservoir d'icônes ne prend aucune place à l'écran */
+.sprites { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+.icone {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  fill: currentColor;
+}
+
+.pile { display: grid; gap: 16px; }
+
+.bloc {
+  background: var(--surface);
+  border: var(--carte-bord);
+  border-top: var(--carte-lisere);
+  border-radius: var(--rayon-carte);
+  padding: 16px;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.erreur {
+  color: var(--texte);
+  background: color-mix(in srgb, var(--depasse) 14%, var(--surface));
+  border: 2px solid var(--depasse);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.message {
+  background: color-mix(in srgb, var(--ok) 12%, var(--surface));
+  border: 2px solid var(--ok);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.vide {
+  margin: 8px 0 16px;
+  padding: 16px;
+  color: var(--discret);
+  border: 2px dashed var(--trait);
+  border-radius: 14px;
+}
+
+
+/* ---------- 4. Boutons ---------- */
+
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 10px 16px;
+  border: 2px solid var(--bord-bouton);
+  border-radius: var(--rayon-bouton);
+  background: var(--surface-2);
+  color: var(--texte);
+  font: 700 1.05rem/1.2 var(--f-titre);
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition: background-color var(--duree), border-color var(--duree), color var(--duree);
+}
+
+.bouton-principal {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-texte);
+}
+
+/* Action qui fait perdre quelque chose (supprimer) */
+.bouton-danger {
+  color: var(--depasse);
+  border-color: color-mix(in srgb, var(--depasse) 60%, var(--fond));
+}
+/* Premier appui sur « Supprimer » : il faut appuyer une seconde fois */
+.bouton-danger.arme {
+  background: var(--depasse);
+  border-color: var(--depasse);
+  color: var(--fond);
+}
+
+.bouton:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.bouton.petit { min-height: 48px; padding: 8px 14px; font-size: 0.98rem; }
+
+.bouton-icone {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0;
+}
+
+.large { width: 100%; }
+
+.rangee-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.commandes { display: grid; gap: 10px; }
+
+
+/* ---------- 5. En-tête et bandeau de mise à jour ---------- */
+
+.entete {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0 14px;
+}
+.logo { width: 44px; height: 44px; border-radius: 10px; display: block; }
+
+/* Le nom « Omni-Courses » garde la police du logo dans tous les thèmes */
+.marque {
+  font-family: "Oxanium", "Trebuchet MS", system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 1.9rem;
+  letter-spacing: 0.02em;
+  overflow-wrap: normal;
+}
+.marque span { color: var(--accent); }
+.marque-petite { font-size: 1.5rem; }
+
+.entete-ecran { padding: 8px 0 18px; display: grid; gap: 6px; }
+
+.bandeau {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  border-radius: var(--rayon-carte);
+}
+.bandeau strong { font-family: var(--f-titre); font-size: 1.1rem; }
+
+#alerte-stockage { margin-bottom: 16px; }
+
+
+/* ---------- 6. Carte du budget ----------
+   Collée en haut de l'écran quand on fait défiler la liste.
+   data-etat vaut « aucun » (pas de budget), « ok », « attention » ou
+   « depasse ». La couleur suit l'état, mais l'icône et le texte disent
+   toujours la même chose : on ne dépend jamais de la couleur seule. */
+
+.carte-budget {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  gap: 8px;
+  margin: 0 -4px 18px;
+  padding: 12px 14px 14px;
+  background: var(--surface);
+  border: var(--carte-bord);
+  border-top: var(--carte-lisere);
+  border-radius: var(--rayon-carte);
+  box-shadow: var(--ombre);
+  --etat: var(--accent);
+}
+.carte-budget[data-etat="ok"]        { --etat: var(--ok); }
+.carte-budget[data-etat="attention"] { --etat: var(--attention); }
+.carte-budget[data-etat="depasse"]   { --etat: var(--depasse); }
+/* Avec un budget, le liseré du haut prend la couleur de l'état (épais) */
+.carte-budget:not([data-etat="aucun"]) { border-top: 5px solid var(--etat); }
+
+.cb-ligne-haut {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.cb-total { display: grid; }
+.cb-libelle { font-size: 0.85rem; color: var(--discret); }
+.cb-montant { font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
+
+/* Le budget, qui est aussi un bouton (définir / modifier) */
+.cb-budget {
+  display: grid;
+  justify-items: end;
+  min-height: 52px;
+  min-width: 112px;
+  padding: 4px 12px;
+  border: 2px solid var(--bord-bouton);
+  border-radius: var(--rayon-bouton);
+  background: var(--surface-2);
+  color: var(--texte);
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.cb-budget .cb-libelle { display: inline-flex; align-items: center; gap: 4px; }
+#cb-budget { font-size: 1.1rem; font-weight: 700; }
+.icone.petite { width: 16px; height: 16px; }
+
+.cb-etat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  border: 2px solid var(--etat);
+  background: color-mix(in srgb, var(--etat) 12%, var(--surface));
+  color: var(--texte);
+  font-weight: 600;
+  font-size: 0.98rem;
+  line-height: 1.3;
+}
+.cb-etat .icone { color: var(--etat); }
+
+/* La barre de progression */
+.cb-barre {
+  position: relative;
+  display: flex;
+  height: 16px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--bord-bouton);
+  overflow: hidden;
+}
+.cb-barre-coche,
+.cb-barre-reste {
+  display: block;
+  height: 100%;
+  width: 0;
+  transition: width var(--duree) ease;
+}
+/* Déjà dans le panier : partie pleine */
+.cb-barre-coche { background: var(--etat); }
+/* Reste à acheter : partie hachurée (se distingue sans la couleur) */
+.cb-barre-reste {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--etat) 0 4px,
+    color-mix(in srgb, var(--etat) 35%, var(--surface-2)) 4px 8px
+  );
+}
+/* Quand le budget est dépassé : un trait marque où il s'arrête */
+.cb-repere {
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  width: 3px;
+  margin-left: -1px;
+  background: var(--texte);
+  display: none;
+}
+.carte-budget[data-etat="depasse"] .cb-repere { display: block; }
+
+.cb-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+  margin: 0;
+}
+.cb-details div { display: grid; }
+.cb-details dt { font-size: 0.85rem; color: var(--discret); }
+.cb-details dd { margin: 0; font-weight: 700; font-size: 1.05rem; line-height: 1.2; }
+
+.cb-sans-prix { font-size: 0.85rem; color: var(--discret); line-height: 1.3; }
+
+
+/* ---------- 7. Liste des articles ---------- */
+
+.titre-section {
+  margin: 4px 0 10px;
+  font-size: 1.05rem;
+  color: var(--discret);
+  letter-spacing: 0.04em;
+}
+
+.liste-articles,
+.liste-favoris {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.article {
+  display: flex;
+  align-items: stretch;
+  background: var(--surface);
+  border: 1px solid var(--trait);
+  border-radius: 14px;
+  min-height: 64px;
+}
+
+/* Toute la partie gauche (case + texte) coche l'article quand on la touche */
+.article-coche {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 6px 10px 12px;
+  cursor: pointer;
+}
+
+.article-texte { display: grid; min-width: 0; }
+.article-nom { font-weight: 600; font-size: 1.05rem; line-height: 1.3; }
+.article-detail { font-size: 0.92rem; color: var(--discret); }
+.article-detail .mono { color: var(--texte); font-size: 0.95rem; }
+
+/* Article coché : barré ET atténué (pas seulement une couleur) */
+.article.coche .article-nom { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--discret); }
+.article.coche { background: color-mix(in srgb, var(--surface) 55%, var(--fond)); }
+
+/* Grandes cases à cocher, dessinées pour être bien visibles */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  border: 2px solid var(--discret);
+  border-radius: 8px;
+  background: var(--surface-2);
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+}
+input[type="checkbox"]::after {
+  content: "";
+  width: 9px;
+  height: 16px;
+  margin-top: -3px;
+  border: solid var(--accent-texte);
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+  opacity: 0;
+}
+input[type="checkbox"]:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+input[type="checkbox"]:checked::after { opacity: 1; }
+
+/* Boutons étoile et crayon à droite de chaque article */
+.article-bouton {
+  flex: none;
+  width: 52px;
+  min-height: 52px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 0;
+  border-left: 1px solid var(--trait);
+  color: var(--discret);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.article-bouton:last-child { border-radius: 0 14px 14px 0; }
+.article-bouton[aria-pressed="true"] { color: var(--accent); }
+
+.commandes-liste { display: grid; gap: 10px; margin-top: 8px; }
+
+/* Bouton « Ajouter » en bas à droite, au-dessus de la navigation */
+.bouton-flottant {
+  position: fixed;
+  z-index: 10;
+  right: max(16px, calc((100vw - 640px) / 2 + 16px));
+  bottom: calc(var(--hauteur-nav) + 16px + env(safe-area-inset-bottom));
+  min-height: 60px;
+  padding: 10px 22px 10px 18px;
+  border-radius: 30px;
+  box-shadow: var(--ombre);
+  font-size: 1.1rem;
+}
+
+
+/* ---------- 8. Favoris ---------- */
+
+.favori {
+  display: flex;
+  align-items: stretch;
+  background: var(--surface);
+  border: 1px solid var(--trait);
+  border-radius: 14px;
+  min-height: 64px;
+}
+.favori-ajouter {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px 10px 12px;
+  background: none;
+  border: 0;
+  border-radius: 14px 0 0 14px;
+  color: var(--texte);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.favori-plus {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-texte);
+}
+.favori-texte { display: grid; min-width: 0; }
+.favori-nom { font-weight: 600; font-size: 1.05rem; }
+.favori-detail { font-size: 0.9rem; color: var(--discret); }
+
+
+/* ---------- 9. Réglages et À propos ---------- */
+
+fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+fieldset.bloc { border: var(--carte-bord); border-top: var(--carte-lisere); padding: 16px; }
+legend { padding: 0; font-weight: 700; margin-bottom: 8px; }
+fieldset.bloc legend { float: left; width: 100%; }
+fieldset.bloc legend + * { clear: both; }
+
+.choix { display: grid; gap: 8px; }
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 12px;
+  border: 2px solid var(--trait);
+  border-radius: 12px;
+  background: var(--surface-2);
+  cursor: pointer;
+}
+.option:has(input:checked) { border-color: var(--accent); }
+.option span { display: grid; }
+
+/* Boutons ronds dessinés à la main : bien visibles dans les 3 thèmes */
+input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  border: 2px solid var(--discret);
+  border-radius: 50%;
+  background: var(--surface);
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+}
+input[type="radio"]::after {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+}
+input[type="radio"]:checked { border-color: var(--accent); }
+input[type="radio"]:checked::after { opacity: 1; }
+
+.apropos-entete { display: flex; align-items: center; gap: 14px; }
+.apropos-entete img { border-radius: 16px; }
+.adresse-mail { font-family: var(--f-chiffres); font-size: 0.92rem; overflow-wrap: anywhere; }
+
+
+/* ---------- 10. Navigation du bas ---------- */
+
+.navigation {
+  position: fixed;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--surface);
+  border-top: 1px solid var(--trait);
+}
+.navigation a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: var(--hauteur-nav);
+  color: var(--discret);
+  text-decoration: none;
+  font: 600 0.82rem/1.1 var(--f-titre);
+  border-top: 3px solid transparent;
+  touch-action: manipulation;
+}
+/* Écran actuel : couleur d'accent ET trait au-dessus */
+.navigation a[aria-current="page"] {
+  color: var(--accent);
+  border-top-color: var(--accent);
+}
+
+
+/* ---------- 11. Fenêtres (boîtes de dialogue) ---------- */
+
+dialog {
+  width: min(560px, calc(100% - 24px));
+  max-height: calc(100dvh - 24px);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: var(--surface);
+  color: var(--texte);
+  border: var(--carte-bord);
+  border-top: var(--carte-lisere);
+  border-radius: var(--rayon-carte);
+  box-shadow: var(--ombre);
+}
+dialog::backdrop { background: rgb(8 6 12 / 70%); }
+
+.formulaire { display: grid; gap: 14px; padding: 18px 16px; }
+
+.champ { display: grid; gap: 4px; min-width: 0; }
+.champ label { font-weight: 600; }
+
+input[type="text"] {
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 12px;
+  border: 2px solid var(--bord-bouton);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--texte);
+  font: 1.1rem/1.2 var(--f-texte);
+}
+input[type="text"]::placeholder { color: var(--discret); opacity: 1; }
+input[aria-invalid="true"] { border-color: var(--depasse); }
+
+.erreur-champ { color: var(--depasse); font-weight: 600; font-size: 0.92rem; }
+
+.compteur { display: flex; gap: 6px; }
+.compteur input { text-align: center; min-width: 0; }
+
+/* Quantité et prix côte à côte, l'un sous l'autre sur très petit écran */
+@media (max-width: 380px) {
+  .champs-chiffres { grid-template-columns: 1fr; }
+}
+
+.resume { margin: 0; padding-left: 22px; display: grid; gap: 4px; }
+
+.avertissement {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 2px solid var(--attention);
+  background: color-mix(in srgb, var(--attention) 12%, var(--surface));
+}
+.avertissement .icone { color: var(--attention); }
+
+
+/* ---------- 12. Petit message temporaire ---------- */
+
+.message-bref {
+  position: fixed;
+  z-index: 30;
+  left: 16px;
+  right: 16px;
+  bottom: calc(var(--hauteur-nav) + 92px + env(safe-area-inset-bottom));
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--texte);
+  color: var(--fond);
+  font-weight: 600;
+  text-align: center;
+  box-shadow: var(--ombre);
+}
+
+
+/* ---------- 13. « Réduire les animations » ----------
+   Si le téléphone le demande, plus aucune transition du tout. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}

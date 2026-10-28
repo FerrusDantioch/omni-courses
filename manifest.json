@@ -1,0 +1,47 @@
+{
+  "name": "Omni-Courses — liste de courses et budget",
+  "short_name": "Omni-Courses",
+  "description": "Ta liste de courses avec prix, budget et favoris. Fonctionne hors ligne, sans compte : tout reste sur ton téléphone.",
+  "id": "/omni-courses/",
+  "lang": "fr",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#14111d",
+  "theme_color": "#14111d",
+  "categories": [
+    "shopping",
+    "lifestyle",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Favoris",
+      "short_name": "Favoris",
+      "description": "Ouvrir directement les favoris",
+      "url": "./index.html#favoris"
+    }
+  ]
+}
