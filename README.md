@@ -247,8 +247,7 @@ Dantioch.
 **Polices** Oxanium, Literata et JetBrains Mono : SIL Open Font License 1.1
 (fichier [POLICES-OFL.txt](POLICES-OFL.txt)).
 
-Application réalisée avec l'aide de Claude, l'intelligence artificielle
-d'Anthropic. L'idée, les fonctions et l'apparence sont de Ferrus Dantioch.
+Application réalisée avec l'aide de l'intelligence artificielle. L'idée, les fonctions et l'apparence sont de Ferrus Dantioch.
 L'application elle-même n'utilise aucune intelligence artificielle.
 
 **Retours :** omni-systeme.choking513@passmail.net

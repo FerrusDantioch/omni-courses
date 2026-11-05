@@ -23,7 +23,7 @@
 
 /* ⚠️ Numéro affiché dans « À propos ». À augmenter avec la version du
    service worker (constante CACHE dans sw.js) à chaque modification. */
-const VERSION = '1.1.0';
+const VERSION = '1.1.1';
 
 
 /* ---------- 1. État général et enregistrement ---------- */
